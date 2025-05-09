@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Gerador de Senhas</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 50px;
+    }
+    #senha {
+      font-size: 24px;
+      margin: 20px 0;
+    }
+    input[type="number"] {
+      width: 50px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Gerador de Senhas</h1>
+
+  <label for="tamanho">Tamanho da senha:</label>
+  <input type="number" id="tamanho" min="4" max="32" value="12">
+
+  <div>
+    <label><input type="checkbox" id="letras" checked> Letras</label>
+    <label><input type="checkbox" id="numeros" checked> Números</label>
+    <label><input type="checkbox" id="simbolos"> Símbolos</label>
+  </div>
+
+  <button onclick="gerarSenha()">Gerar senha</button>
+
+  <div id="senha">Clique no botão para gerar uma senha</div>
+
+  <script>
+    function gerarSenha() {
+      const letras = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+      const numeros = '0123456789';
+      const simbolos = '!@#$%&*()-_=+{}[]';
+      let caracteres = '';
+      let senha = '';
+
+      if (document.getElementById('letras').checked) caracteres += letras;
+      if (document.getElementById('numeros').checked) caracteres += numeros;
+      if (document.getElementById('simbolos').checked) caracteres += simbolos;
+
+      const tamanho = parseInt(document.getElementById('tamanho').value);
+
+      if (caracteres.length === 0) {
+        alert('Selecione pelo menos um tipo de caractere!');
+        return;
+      }
+
+      for (let i = 0; i < tamanho; i++) {
+        const randIndex = Math.floor(Math.random() * caracteres.length);
+        senha += caracteres[randIndex];
+      }
+
+      document.getElementById('senha').innerText = senha;
+    }
+  </script>
+</body>
+</html>
