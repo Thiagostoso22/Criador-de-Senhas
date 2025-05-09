@@ -1,67 +1,111 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <title>Gerador de Senhas</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      margin-top: 50px;
-    }
-    #senha {
-      font-size: 24px;
-      margin: 20px 0;
-    }
-    input[type="number"] {
-      width: 50px;
-    }
-  </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Gerador de Senhas Seguras</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-  <h1>Gerador de Senhas</h1>
+<body class="bg-gray-900 text-white flex items-center justify-center min-h-screen p-4">
+  <div class="bg-gray-800 p-8 rounded-2xl shadow-lg w-full max-w-md space-y-6">
+    <h1 class="text-3xl font-bold text-center">🔐 Gerador de Senhas</h1>
 
-  <label for="tamanho">Tamanho da senha:</label>
-  <input type="number" id="tamanho" min="4" max="32" value="12">
+    <div>
+      <label class="block mb-1 font-semibold">Tamanho da Senha:</label>
+      <input type="range" min="4" max="32" value="12" id="tamanho" class="w-full">
+      <p class="text-sm mt-1">Tamanho: <span id="tamanhoValor">12</span></p>
+    </div>
 
-  <div>
-    <label><input type="checkbox" id="letras" checked> Letras</label>
-    <label><input type="checkbox" id="numeros" checked> Números</label>
-    <label><input type="checkbox" id="simbolos"> Símbolos</label>
+    <div class="space-y-2">
+      <label class="flex items-center gap-2">
+        <input type="checkbox" id="maiusculas" checked>
+        Incluir letras maiúsculas
+      </label>
+      <label class="flex items-center gap-2">
+        <input type="checkbox" id="minusculas" checked>
+        Incluir letras minúsculas
+      </label>
+      <label class="flex items-center gap-2">
+        <input type="checkbox" id="numeros" checked>
+        Incluir números
+      </label>
+      <label class="flex items-center gap-2">
+        <input type="checkbox" id="simbolos">
+        Incluir símbolos (!@#$...)
+      </label>
+    </div>
+
+    <button onclick="gerarSenha()" class="bg-blue-600 hover:bg-blue-700 transition w-full py-2 rounded-xl text-lg font-semibold">
+      Gerar Senha
+    </button>
+
+    <div class="bg-gray-700 p-4 rounded-lg text-center text-xl break-all" id="senha">
+      Sua senha aparecerá aqui
+    </div>
+
+    <div class="flex justify-between items-center mt-2">
+      <p id="forca" class="text-sm italic"></p>
+      <button onclick="copiarSenha()" class="text-blue-400 hover:underline">Copiar</button>
+    </div>
   </div>
 
-  <button onclick="gerarSenha()">Gerar senha</button>
-
-  <div id="senha">Clique no botão para gerar uma senha</div>
-
   <script>
+    const tamanhoInput = document.getElementById('tamanho');
+    const tamanhoValor = document.getElementById('tamanhoValor');
+    const senhaEl = document.getElementById('senha');
+    const forcaEl = document.getElementById('forca');
+
+    tamanhoInput.addEventListener('input', () => {
+      tamanhoValor.textContent = tamanhoInput.value;
+    });
+
     function gerarSenha() {
-      const letras = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+      const letrasMaiusculas = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+      const letrasMinusculas = 'abcdefghijklmnopqrstuvwxyz';
       const numeros = '0123456789';
-      const simbolos = '!@#$%&*()-_=+{}[]';
-      let caracteres = '';
-      let senha = '';
+      const simbolos = '!@#$%&*()_-+=[]{}';
 
-      if (document.getElementById('letras').checked) caracteres += letras;
-      if (document.getElementById('numeros').checked) caracteres += numeros;
-      if (document.getElementById('simbolos').checked) caracteres += simbolos;
+      let chars = '';
+      if (document.getElementById('maiusculas').checked) chars += letrasMaiusculas;
+      if (document.getElementById('minusculas').checked) chars += letrasMinusculas;
+      if (document.getElementById('numeros').checked) chars += numeros;
+      if (document.getElementById('simbolos').checked) chars += simbolos;
 
-      const tamanho = parseInt(document.getElementById('tamanho').value);
-
-      if (caracteres.length === 0) {
-        alert('Selecione pelo menos um tipo de caractere!');
+      const tamanho = parseInt(tamanhoInput.value);
+      if (chars.length === 0) {
+        alert('Selecione ao menos um tipo de caractere.');
         return;
       }
 
+      let senha = '';
       for (let i = 0; i < tamanho; i++) {
-        const randIndex = Math.floor(Math.random() * caracteres.length);
-        senha += caracteres[randIndex];
+        const rand = Math.floor(Math.random() * chars.length);
+        senha += chars[rand];
       }
 
-      document.getElementById('senha').innerText = senha;
+      senhaEl.textContent = senha;
+      avaliarForca(senha);
+    }
+
+    function avaliarForca(senha) {
+      let score = 0;
+      if (senha.length >= 8) score++;
+      if (/[A-Z]/.test(senha)) score++;
+      if (/[a-z]/.test(senha)) score++;
+      if (/[0-9]/.test(senha)) score++;
+      if (/[^A-Za-z0-9]/.test(senha)) score++;
+
+      const niveis = ['Muito fraca', 'Fraca', 'Média', 'Forte', 'Muito forte'];
+      forcaEl.textContent = `Força: ${niveis[Math.min(score, niveis.length - 1)]}`;
+    }
+
+    function copiarSenha() {
+      const senha = senhaEl.textContent;
+      navigator.clipboard.writeText(senha).then(() => {
+        alert('Senha copiada para a área de transferência!');
+      });
     }
   </script>
 </body>
 </html>
+
